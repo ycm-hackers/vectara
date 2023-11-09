@@ -26,7 +26,7 @@ def get_headers() -> Dict[str, str]:
     }
     return headers
 
-def get_filings(cik: str, start_date_str: str, end_date_str: str, filing_type: str = "10-K") -> List[Dict[str, str]]:
+def get_filings(cik: str, start_date_str: str, end_date_str: str, filing_type: str = "10-Q") -> List[Dict[str, str]]:
     base_url = "https://www.sec.gov/cgi-bin/browse-edgar"
     params = {
         "action": "getcompany", "CIK": cik, "type": filing_type, "dateb": "", "owner": "exclude", 
@@ -64,7 +64,7 @@ def get_filings(cik: str, start_date_str: str, end_date_str: str, filing_type: s
                     url = entry.link["href"]
                     with rate_limiter:
                         soup = BeautifulSoup(session.get(url, headers=get_headers()).content, "html.parser")
-                    l = soup.select_one('td:-soup-contains("10-K") + td a')
+                    l = soup.select_one('td:-soup-contains("10-Q") + td a')
                     html_url = "https://www.sec.gov" + str(l["href"])
                     l = soup.select_one('td:-soup-contains("Complete submission text file") + td a')
                     submission_url = "https://www.sec.gov" + str(l["href"])
@@ -90,10 +90,10 @@ class EdgarCrawler(Crawler):
     def crawl(self) -> None:
         rate_limiter = RateLimiter(max_calls=1, period=1)
         for ticker in self.tickers:
-            logging.info(f"downloading 10-Ks for {ticker}")
+            logging.info(f"downloading 10-Qs for {ticker}")
             
             cik = ticker_dict[ticker]
-            filings = get_filings(cik, self.start_date, self.end_date, '10-K')
+            filings = get_filings(cik, self.start_date, self.end_date, '10-Q')
 
             # no more filings in search universe
             if len(filings) == 0:

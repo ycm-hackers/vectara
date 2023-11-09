@@ -3,14 +3,8 @@ import json
 import requests
 import toml
 
-def send_query(query_text, api_key, customer_id, corpus_id):
-    api_endpoint = "https://api.vectara.io/v1/query"
-    headers = {
-        "customer-id": str(customer_id),
-        "x-api-key": api_key,
-        "Content-Type": "application/json"
-    }
-    query_json = json.dumps({
+def create_query_json(query_text, customer_id, corpus_id):
+    return json.dumps({
         "query": [
             {
                 "query": query_text,
@@ -20,11 +14,26 @@ def send_query(query_text, api_key, customer_id, corpus_id):
                         "customerId": customer_id,
                         "corpusId": corpus_id
                     }
+                ],
+                "summary": [
+                    {
+                        "summarizerPromptName": "vectara-summary-ext-v1.2.0",
+                        "responseLang": "en",
+                        "maxSummarizedResults": 5
+                    }
                 ]
             }
         ]
     })
-    response = requests.post(api_endpoint, data=query_json, headers=headers)
+
+def send_query(query_text, api_key, customer_id, corpus_id):
+    api_endpoint = "https://api.vectara.io/v1/query"
+    headers = {
+        "customer-id": str(customer_id),
+        "x-api-key": api_key,
+        "Content-Type": "application/json"
+    }
+    response = requests.post(api_endpoint, data=create_query_json(query_text, customer_id, corpus_id), headers=headers)
     return response.json() if response.status_code == 200 else None
 
 def format_response(response_json):
