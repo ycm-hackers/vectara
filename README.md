@@ -29,5 +29,6 @@ pip install -r requirements.txt
 
 1. Open terminal and run in Python
 ```s
-python main.js
+python app.js
 ```
+Then open your browser at the displayed URL and use the application
