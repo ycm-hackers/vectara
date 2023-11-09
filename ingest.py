@@ -2,6 +2,7 @@ import logging
 import json
 import requests
 import time
+import argparse
 from omegaconf import OmegaConf, DictConfig
 import toml     # type: ignore
 import sys
@@ -65,7 +66,7 @@ def reset_corpus(endpoint: str, customer_id: str, corpus_id: int, auth_url: str,
         logging.error(f"Error resetting corpus: {response.status_code} {response.text}")
                       
 
-def main() -> None:
+def main():
     """
     Main function that runs the web crawler based on environment variables.
     
@@ -73,52 +74,32 @@ def main() -> None:
     accordingly. Starts the crawl loop and logs the progress and errors.
     """
 
-    if len(sys.argv) != 3:
-        logging.info("Usage: python ingest.py <config_file> <secrets-profile>")
-        return
-    config_name = sys.argv[1]
-    profile_name = sys.argv[2]
+    parser = argparse.ArgumentParser(description='Run Edgar Crawler for a given ticker.')
+    parser.add_argument('ticker', type=str, help='Ticker symbol for the company')
+    args = parser.parse_args()
+
+    config_name = "config/edgar.yaml"
+    profile_name = "default"
 
     # process arguments 
     cfg: DictConfig = DictConfig(OmegaConf.load(config_name))
     
     # add .env params, by profile
-    volume = '/home/vectara/env'
-    with open(f"{volume}/secrets.toml", 'r') as f:
+    volume = '.'
+    with open(f"secrets.toml", 'r') as f:
         env_dict = toml.load(f)
     if profile_name not in env_dict:
         logging.info(f'Profile "{profile_name}" not found in secrets.toml')
         return
     env_dict = env_dict[profile_name]
 
-    for k,v in env_dict.items():
-        if k=='HUBSPOT_API_KEY':
-            OmegaConf.update(cfg, f'hubspot_crawler.{k.lower()}', v)
-            continue
-        if k=='NOTION_API_KEY':
-            OmegaConf.update(cfg, f'notion_crawler.{k.lower()}', v)
-            continue
-        if k=='DISCOURSE_API_KEY':
-            OmegaConf.update(cfg, f'discourse_crawler.{k.lower()}', v)
-            continue
-        if k=='FMP_API_KEY':
-            OmegaConf.update(cfg, f'fmp_crawler.{k.lower()}', v)
-            continue
-        if k=='JIRA_PASSWORD':
-            OmegaConf.update(cfg, f'jira_crawler.{k.lower()}', v)
-            continue
-        if k=='GITHUB_TOKEN':
-            OmegaConf.update(cfg, f'github_crawler.{k.lower()}', v)
-            continue
-        if k=='SYNAPSE_TOKEN':
-            OmegaConf.update(cfg, f'synapse_crawler.{k.lower()}', v)
-            continue
-        if k.startswith('aws_'):
-            OmegaConf.update(cfg, f's3_crawler.{k.lower()}', v)
-            continue
+    # default (otherwise) - add to vectara config
+    OmegaConf.update(cfg['vectara'], 'api_key', env_dict['api_key'])
+    OmegaConf.update(cfg['vectara'], 'customer_id', env_dict['customer_id'])
+    OmegaConf.update(cfg['vectara'], 'corpus_id', env_dict['corpus_id'])
 
-        # default (otherwise) - add to vectara config
-        OmegaConf.update(cfg['vectara'], k, v)
+    # Set the ticker in the cfg
+    OmegaConf.update(cfg, 'edgar_crawler.tickers', [args.ticker.upper()])
 
     endpoint = 'api.vectara.io'
     customer_id = cfg.vectara.customer_id

@@ -1,0 +1,13 @@
+vectara:
+  corpus_id: 3
+  customer_id: 3479383716
+  reindex: true
+
+crawling:
+  crawler_type: edgar
+
+edgar_crawler:
+  tickers: ['AAPL', 'AMZN', 'GOOG',
+           ]
+  start_date: "2021-01-01"
+  end_date: "2023-05-08"
