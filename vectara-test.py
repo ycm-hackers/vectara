@@ -1,11 +1,13 @@
 import requests
 import json
+import toml
 
+secrets = toml.load("secrets.toml")
 # Constants for the Vectara API
-API_KEY = "zwt_z2MupAEqaFNRDQhWISr9Yvt4g7X8_WM2MQa-Ng"  # Replace with your actual API key
-CUSTOMER_ID = 3479383716  # Replace with your actual customer ID
-CORPUS_ID = 3  # Replace with your actual corpus ID
-API_ENDPOINT = "https://api.vectara.io/v1/query"  # Replace with the actual API endpoint if different
+API_KEY = secrets["api_key"]
+CUSTOMER_ID = secrets["customer_id"]
+CORPUS_ID = secrets["corpus_id"]
+API_ENDPOINT = "https://api.vectara.io/v1/query"  
 
 # Function to create the query JSON
 def create_query_json(query_text):
