@@ -26,7 +26,11 @@ def create_query_json(query_text, customer_id, corpus_id):
         ]
     })
 
-def send_query(query_text, api_key, customer_id, corpus_id):
+def send_query(query_text):
+    secrets = toml.load("secrets.toml")["default"]
+    api_key = secrets["api_key"]
+    customer_id = secrets["customer_id"]
+    corpus_id = secrets["corpus_id"]
     api_endpoint = "https://api.vectara.io/v1/query"
     headers = {
         "customer-id": str(customer_id),

@@ -66,7 +66,7 @@ def reset_corpus(endpoint: str, customer_id: str, corpus_id: int, auth_url: str,
         logging.error(f"Error resetting corpus: {response.status_code} {response.text}")
                       
 
-def main():
+def main(ticker):
     """
     Main function that runs the web crawler based on environment variables.
     
@@ -74,10 +74,9 @@ def main():
     accordingly. Starts the crawl loop and logs the progress and errors.
     """
 
-    parser = argparse.ArgumentParser(description='Run Edgar Crawler for a given ticker.')
-    parser.add_argument('ticker', type=str, help='Ticker symbol for the company')
-    args = parser.parse_args()
-
+    # parser = argparse.ArgumentParser(description='Run Edgar Crawler for a given ticker.')
+    # parser.add_argument('ticker', type=str, help='Ticker symbol for the company')
+    # args = parser.parse_args()
     config_name = "config/edgar.yaml"
     profile_name = "default"
 
@@ -99,7 +98,7 @@ def main():
     OmegaConf.update(cfg['vectara'], 'corpus_id', env_dict['corpus_id'])
 
     # Set the ticker in the cfg
-    OmegaConf.update(cfg, 'edgar_crawler.tickers', [args.ticker.upper()])
+    OmegaConf.update(cfg, 'edgar_crawler.tickers', [ticker.upper()])
 
     endpoint = 'api.vectara.io'
     customer_id = cfg.vectara.customer_id

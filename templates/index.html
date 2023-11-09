@@ -1,0 +1,104 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatGPT with Ticker Query</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 60%; /* Adjust the width of the form */
+            margin: 0 auto; /* Center the form */
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            height: 150px;
+            resize: none;
+        }
+        input[type="submit"] {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #response {
+            width: 60%;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <form id="tickerForm" method="POST">
+            <label for="ticker">Enter the ticker for the company you want to crawl:</label>
+            <input type="text" id="ticker" name="ticker">
+            <input type="submit" value="Submit">
+        </form>
+
+        <form id="queryForm" method="POST">
+            <label for="query">Enter your query:</label>
+            <textarea id="query" name="query"></textarea>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <div id="response"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#tickerForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/ticker',
+                    method: 'POST',
+                    data: $(this).serialize()                    
+                });
+            });
+
+            $('#queryForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/query',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#response').html('<p>' + response.responseSet[0].summary[0].text + '</p>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
