@@ -23,6 +23,8 @@ conda activate tickera
 ```sh
 pip install -r requirements.txt
 ```
+4. Setup your secrets.toml based on example
+
 ## run 
 
 1. Open terminal and run in Python
