@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import main
 import ingest
 import logging
+import toml
 
 logging.basicConfig(level=logging.INFO)
 
@@ -26,7 +27,11 @@ def index():
 def query():
     if request.method == 'POST':
         query_text = request.form.get('query')
-        response_json = main.send_query(query_text)
+        secrets = toml.load("secrets.toml")["default"]
+        api_key = secrets["api_key"]
+        customer_id = secrets["customer_id"]
+        corpus_id = secrets["corpus_id"]
+        response_json = main.send_query(query_text, api_key, customer_id, corpus_id)
         if response_json:
             formatted_response = main.format_response(response_json)
             return {"response": formatted_response}

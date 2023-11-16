@@ -124,6 +124,10 @@ def main(ticker):
     logging.info(f"Finished crawl of type {crawler_type}...")
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('ticker', help='The ticker for the company you want to crawl')
+    args = parser.parse_args()
+
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     handler = logging.StreamHandler(sys.stdout)
@@ -131,4 +135,4 @@ if __name__ == '__main__':
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     root.addHandler(handler)
-    main()
+    main(args.ticker)
