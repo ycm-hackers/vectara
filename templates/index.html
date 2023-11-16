@@ -1,8 +1,7 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT with Ticker Query</title>
+    <title>Ticker Analyst</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body {
@@ -17,6 +16,10 @@
             justify-content: center;
             align-items: center;
             margin-top: 50px;
+            max-width: 500px; /* Set a max-width for the form container */
+            width: 100%; /* Set width to be 100% for smaller screens */
+            margin-left: auto;
+            margin-right: auto;
         }
         form {
             background: #fff;
@@ -24,19 +27,19 @@
             border-radius: 8px;
             box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            width: 60%; /* Adjust the width of the form */
-            margin: 0 auto; /* Center the form */
+            width: 100%;
         }
         label {
             font-weight: bold;
             margin-bottom: 10px;
         }
         input[type="text"], textarea {
-            width: 100%;
+            width: calc(100% - 20px); /* Adjust width to account for padding */
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 4px;
             border: 1px solid #ddd;
+            max-width: 100%; /* Ensure it doesn't exceed the form's width */
         }
         textarea {
             height: 150px;
@@ -50,19 +53,42 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .button-active {
+            background-color: #555; /* Darker shade for active state */
+        }
         #response {
-            width: 60%;
             margin: 20px auto;
             padding: 20px;
             border-radius: 4px;
             border: 1px solid #ddd;
+            width: calc(100% - 40px); /* Adjust width to account for padding */
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+        }
+        .footer {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="form-container">
         <form id="tickerForm" method="POST">
-            <label for="ticker">Enter the ticker for the company you want to crawl:</label>
+            <label for="ticker">Enter the ticker for the company you want to crawl (2023):</label>
             <input type="text" id="ticker" name="ticker">
             <input type="submit" value="Submit">
         </form>
@@ -72,33 +98,53 @@
             <textarea id="query" name="query"></textarea>
             <input type="submit" value="Submit">
         </form>
+        <div id="response"></div>
     </div>
 
-    <div id="response"></div>
 
     <script>
         $(document).ready(function() {
+            function displayCompletionMessage() {
+                $('#response').html('<p>Crawling complete. You can now submit a query.</p>');
+            }
+    
             $('#tickerForm').on('submit', function(e) {
                 e.preventDefault();
+                $('#response').html('<div class="loading-spinner"></div>');
                 $.ajax({
                     url: '/ticker',
                     method: 'POST',
-                    data: $(this).serialize()                    
+                    data: $(this).serialize(),
+                    beforeSend: function() {
+                        $('input[type="submit"]').addClass('button-active');
+                    },
+                    complete: function() {
+                        $('input[type="submit"]').removeClass('button-active');
+                        displayCompletionMessage();
+                    }
                 });
             });
-
+    
             $('#queryForm').on('submit', function(e) {
                 e.preventDefault();
+                $('#response').html('<div class="loading-spinner"></div>');
                 $.ajax({
                     url: '/query',
                     method: 'POST',
                     data: $(this).serialize(),
+                    beforeSend: function() {
+                        $('input[type="submit"]').addClass('button-active');
+                    },
                     success: function(response) {
-                        $('#response').html('<p>' + response.responseSet[0].summary[0].text + '</p>');
+                        $('#response').html('<p>' + response.response + '</p>');
+                    },
+                    complete: function() {
+                        $('input[type="submit"]').removeClass('button-active');
                     }
                 });
             });
         });
     </script>
+    <div class="footer">Ticker Analyst</div>
 </body>
 </html>

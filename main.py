@@ -1,3 +1,5 @@
+#main.py
+
 import subprocess
 import json
 import requests
@@ -41,15 +43,17 @@ def send_query(query_text):
     return response.json() if response.status_code == 200 else None
 
 def format_response(response_json):
+    responses = []
     if response_json and "responseSet" in response_json:
         for response in response_json["responseSet"]:
             if "summary" in response:
                 for summary in response["summary"]:
-                    print("Bot:", summary["text"])
+                    responses.append(summary["text"])
             else:
-                print("Bot: No summary available.")
+                responses.append("No summary available.")
     else:
-        print("Bot: I'm sorry, I couldn't fetch the data.")
+        responses.append("I'm sorry, I couldn't fetch the data.")
+    return ' '.join(responses)
 
 def main():
     secrets = toml.load("secrets.toml")["default"]
@@ -66,7 +70,7 @@ def main():
         if user_input.lower() == 'exit':
             break
         response_json = send_query(user_input, api_key, customer_id, corpus_id)
-        format_response(response_json)
+        print(format_response(response_json))
 
 if __name__ == "__main__":
     main()
